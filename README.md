@@ -6,7 +6,6 @@
   
 `/routes` — routing files.  
   
-All other directories are optional and may be created by the developer if necessary.   
   
 ## Running the Project  
   
@@ -14,5 +13,5 @@ All other directories are optional and may be created by the developer if necess
   
 `npm run dev` — to launch the server with the hot reload feature.  
 
-
+`npx eslint ./`  — to run eslint on the project.
 
