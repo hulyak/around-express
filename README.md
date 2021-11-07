@@ -5,7 +5,11 @@
 `/data` — JSON files to temporarily emulate database integration.  
   
 `/routes` — routing files.  
-  
+
+`/controllers` — request handling files.
+
+`/models` - schema files.
+
   
 ## Running the Project  
   

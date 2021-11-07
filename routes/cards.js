@@ -1,5 +1,7 @@
 const cardsRouter = require('express').Router();
-const { getCards, deleteCard, createCard, likeCard, deleteLikeCard } = require('../controllers/cards');
+const {
+  getCards, deleteCard, createCard, likeCard, deleteLikeCard,
+} = require('../controllers/cards');
 
 cardsRouter.get('/', getCards);
 cardsRouter.post('/', createCard);

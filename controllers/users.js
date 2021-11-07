@@ -8,6 +8,11 @@ const getUser = (req, res) => {
   const { userId } = req.params;
 
   return User.findById(userId)
+    .orFail(() => {
+      const error = new Error('User not found');
+      error.status = 404;
+      throw new Error('User not found');
+    })
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: 'User not found' });
