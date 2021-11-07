@@ -4,23 +4,19 @@ const getUsers = (req, res) => User.find({})
   .then((users) => res.status(200).send({ data: users }))
   .catch((err) => res.status(500).send({ message: err.message }));
 
-const getUser = (req, res) => {
-  const { userId } = req.params;
-
-  return User.findById(userId)
-    .orFail(() => {
-      const error = new Error('User not found');
-      error.status = 404;
-      throw new Error('User not found');
-    })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: 'User not found' });
-      }
-      return res.status(200).send({ data: user });
-    })
-    .catch((err) => res.status(500).send({ message: err.message }));
-};
+const getUser = (req, res) => User.findById(req.user_id)
+  .orFail(() => {
+    const error = new Error('User not found');
+    error.status = 404;
+    throw new Error('User not found');
+  })
+  .then((user) => {
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+    return res.status(200).send({ data: user });
+  })
+  .catch((err) => res.status(500).send({ message: err.message }));
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
@@ -36,10 +32,9 @@ const createUser = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-  const { userId } = req.params;
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(userId, { name, about },
+  User.findByIdAndUpdate(req.user_id, { name, about },
     { new: true, runValidators: true, upsert: true })
     .then((user) => {
       if (!user) {
@@ -51,10 +46,9 @@ const updateProfile = (req, res) => {
 };
 
 const updateAvatar = (req, res) => {
-  const { userId } = req.params;
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(userId, { avatar },
+  User.findByIdAndUpdate(req.user_id, { avatar },
     { new: true, runValidators: true, upsert: true })
     .then((user) => {
       if (!user) {

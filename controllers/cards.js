@@ -6,16 +6,12 @@ const getCards = (req, res) => Card.find({})
   .catch((err) => res.status(500).send({ message: err.message }));
 
 const createCard = (req, res) => {
-  const {
-    name, link, owner, likes, createdAt,
-  } = req.body;
+  const { name, link, owner } = req.body;
 
   // eslint-disable-next-line no-console
   console.log(req.user._id);
 
-  Card.create({
-    name, link, owner, likes, createdAt,
-  })
+  Card.create({ name, link, owner })
     .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
