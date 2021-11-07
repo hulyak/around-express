@@ -1,7 +1,7 @@
 const User = require('../models/user');
 
 const getUsers = (req, res) => User.find({})
-  .then((users) => res.status(200).send(users))
+  .then((users) => res.status(200).send({ data: users }))
   .catch((err) => res.status(500).send({ message: err.message }));
 
 const getUser = (req, res) => {
@@ -17,7 +17,7 @@ const getUser = (req, res) => {
       if (!user) {
         return res.status(404).send({ message: 'User not found' });
       }
-      return res.status(200).send(user);
+      return res.status(200).send({ data: user });
     })
     .catch((err) => res.status(500).send({ message: err.message }));
 };
