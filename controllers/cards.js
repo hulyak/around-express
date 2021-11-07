@@ -6,12 +6,12 @@ const getCards = (req, res) => Card.find({})
   .catch((err) => res.status(500).send({ message: err.message }));
 
 const createCard = (req, res) => {
-  const { name, link, owner } = req.body;
+  const { name, link } = req.body;
 
   // eslint-disable-next-line no-console
   console.log(req.user._id);
 
-  Card.create({ name, link, owner })
+  Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -30,13 +30,13 @@ const deleteCard = (req, res) => {
       error.statusCode = 404;
       throw error;
     })
-    .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: 'Card not found' });
+    .then((card) => res.status(200).send(card))
+    .catch((err) => {
+      if (err.name === 'No card found with that id') {
+        res.status(404).send({ message: 'No card found with that id' });
       }
-      return res.status(200).send(card);
-    })
-    .catch((err) => res.status(500).send({ message: err.message }));
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 const likeCard = (req, res) => {
@@ -49,7 +49,14 @@ const likeCard = (req, res) => {
       throw error;
     })
     .then((card) => res.status(200).send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: `${Object.values(err.errors).map((error) => error.message).join(', ')}`, errors: err.errors });
+      } if (err.name === 'No card found with that id') {
+        return res.status(404).send({ message: 'No card found with that id' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 const deleteLikeCard = (req, res) => {
@@ -63,7 +70,14 @@ const deleteLikeCard = (req, res) => {
     })
 
     .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: `${Object.values(err.errors).map((error) => error.message).join(', ')}`, errors: err.errors });
+      } if (err.name === 'No card found with that id') {
+        return res.status(404).send({ message: 'No card found with that id' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports = {

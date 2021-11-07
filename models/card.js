@@ -15,13 +15,13 @@ const cardsSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
-    validator: {
+    validate: {
       validator: (v) => /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[\w]*))?)/gm.test(v),
       message: '{VALUE} is not a valid URL!',
     },
   },
   likes: {
-    type: Array,
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }], // Array
     default: [],
   },
   createdAt: {
