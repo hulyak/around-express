@@ -14,7 +14,7 @@ const createCard = (req, res) => {
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.message === 'ValidationError') {
         return res.status(400).send({ message: `${Object.values(err.errors).map((error) => error.message).join(', ')}`, errors: err.errors });
       }
       return res.status(500).send({ message: err.message });
@@ -32,7 +32,7 @@ const deleteCard = (req, res) => {
     })
     .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === 'No card found with that id') {
+      if (err.message === 'No card found with that id') {
         res.status(404).send({ message: 'No card found with that id' });
       }
       return res.status(500).send({ message: err.message });
@@ -52,7 +52,7 @@ const likeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: `${Object.values(err.errors).map((error) => error.message).join(', ')}`, errors: err.errors });
-      } if (err.name === 'No card found with that id') {
+      } if (err.message === 'No card found with that id') {
         return res.status(404).send({ message: 'No card found with that id' });
       }
       return res.status(500).send({ message: err.message });
@@ -73,7 +73,7 @@ const deleteLikeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: `${Object.values(err.errors).map((error) => error.message).join(', ')}`, errors: err.errors });
-      } if (err.name === 'No card found with that id') {
+      } if (err.message === 'No card found with that id') {
         return res.status(404).send({ message: 'No card found with that id' });
       }
       return res.status(500).send({ message: err.message });
