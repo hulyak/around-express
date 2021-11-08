@@ -15,15 +15,15 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 app.use(helmet());
 
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
-
 app.use((req, res, next) => {
   req.user = {
     _id: '618715e3d5bbc8fd98dc7911',
   };
   next();
 });
+
+app.use('/users', usersRouter);
+app.use('/cards', cardsRouter);
 
 // global error handling
 app.use('*', (req, res) => {
