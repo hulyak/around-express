@@ -1,7 +1,7 @@
 # http://editorconfig.org
 
 # A special property that should be specified at the very top of the file.
-# When set to true, it stops Editorconfig from searching any higher 
+# When set to true, it stops Editorconfig from searching any higher
 # in the directory tree for .editorconfig files.
 root = true
 
@@ -31,4 +31,6 @@ trim_trailing_whitespace = false
 
 # Denotes whether file should end with a newline
 # Possible values - true, false
-insert_final_newline = true 
+insert_final_newline = true
+
+quote_type = single
