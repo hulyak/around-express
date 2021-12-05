@@ -2,28 +2,22 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const { NODE_ENV, JWT_SECRET } = process.env;
+const NotFoundError = require("../errors/not-found-err");
 
 const getUsers = (req, res) =>
   User.find({})
     .then((users) => res.status(200).send({ data: users }))
     .catch((err) => res.status(500).send({ message: err.message }));
 
-const getUser = (req, res) =>
+const getUser = (req, res, next) =>
   User.findById(req.params.id)
     .orFail(() => {
-      const error = new Error("User not found");
-      error.status = 404;
-      throw new Error("User not found");
+      throw new NotFoundError("User not found");
     })
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => {
-      if (err.message === "User not found") {
-        res.status(404).send({ message: "User not found" });
-      }
-      res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, about, avatar, email, password, verifyPassword } = req.body;
 
   bcrypt
@@ -41,20 +35,10 @@ const createUser = (req, res) => {
     .then((user) =>
       res.status(201).send({ name: user.name, email: user.email })
     )
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(400).send({
-          message: `${Object.values(err.errors)
-            .map((error) => error.message)
-            .join(", ")}`,
-          errors: err.errors,
-        });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -63,28 +47,13 @@ const updateProfile = (req, res) => {
     { new: true, runValidators: true, upsert: false }
   )
     .orFail(() => {
-      const error = new Error("User not found");
-      error.status = 404;
-      throw new Error("User not found");
+      throw new NotFoundError("User not found");
     })
     .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => {
-      if (err.message === "User not found") {
-        res.status(404).send({ message: "User not found" });
-      }
-      if (err.name === "ValidationError") {
-        return res.status(400).send({
-          message: `${Object.values(err.errors)
-            .map((error) => error.message)
-            .join(", ")}`,
-          errors: err.errors,
-        });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -93,28 +62,13 @@ const updateAvatar = (req, res) => {
     { new: true, runValidators: true, upsert: false }
   )
     .orFail(() => {
-      const error = new Error("User not found");
-      error.status = 404;
-      throw new Error("User not found");
+      throw new NotFoundError("User not found");
     })
     .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      if (err.message === "User not found") {
-        res.status(404).send({ message: "User not found" });
-      }
-      if (err.name === "ValidationError") {
-        return res.status(400).send({
-          message: `${Object.values(err.errors)
-            .map((error) => error.message)
-            .join(", ")}`,
-          errors: err.errors,
-        });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials({ email, password })
@@ -129,10 +83,7 @@ const login = (req, res) => {
       );
       res.send({ token });
     })
-    .catch((err) => {
-      // authentication error
-      res.status(401).send({ message: err.message });
-    });
+    .catch(next);
 };
 
 module.exports = {

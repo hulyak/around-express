@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
-const auth = require("./middleware/auth");
+const { auth } = require("./middleware/auth");
 
 const app = express();
 
@@ -35,11 +35,18 @@ app.use(auth);
 app.use("/cards", require("./routes/cards"));
 
 // global error handling
-app.use("*", (req, res) => {
-  res.status(404).send({ message: "Requested resource not found" });
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send({
+    // check the status and display a message based on it
+    message: statusCode === 500 ? "An error occurred on the server" : message,
+  });
+  next(new Error(message));
 });
 
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`App listening at port ${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    // eslint-disable-next-line no-console
+    console.log(`App listening on port ${PORT}`);
+  });
+}

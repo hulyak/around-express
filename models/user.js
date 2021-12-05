@@ -1,46 +1,55 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const isEmail = require("validator/lib/isEmail");
+const isURL = require("validator/lib/isURL");
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 30,
-  },
-  about: {
-    type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 30,
-  },
-  avatar: {
-    type: String,
-    required: true,
-    validate: {
-      validator: (v) =>
-        /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[\w]*))?)/gm.test(
-          v
-        ),
-      message: "{VALUE} is not a valid URL!",
+const { Schema } = mongoose;
+
+const userSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      minlength: 2,
+      maxlength: 30,
+    },
+    about: {
+      type: String,
+      required: true,
+      minlength: 2,
+      maxlength: 30,
+    },
+    avatar: {
+      type: String,
+      required: true,
+      validate: {
+        validator: (v) => isURL(v),
+        message: "avatar must be a URL",
+      },
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      validate: {
+        validator: (v) => isEmail(v),
+        message: "invlaid email format",
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 8,
+      select: false,
+    },
+    verifyPassword: {
+      type: String,
+      required: true,
+      minlength: 8,
     },
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 8,
-  },
-  verifyPassword: {
-    type: String,
-    required: true,
-    minlength: 8,
-  },
-});
+  { versionKey: false }
+);
 
 // add custom method to userSchema with statics property
 userSchema.statics.findUserByCredentials = function findUserByCredentials(

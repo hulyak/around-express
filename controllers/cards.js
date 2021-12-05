@@ -1,11 +1,13 @@
-const Card = require('../models/card');
+const NotFoundError = require("../errors/not-found-err");
+const Card = require("../models/card");
 
-const getCards = (req, res) => Card.find({})
-  .populate('user')
-  .then((cards) => res.status(200).send({ data: cards }))
-  .catch((err) => res.status(500).send({ message: err.message }));
+const getCards = (req, res, next) =>
+  Card.find({})
+    .populate("user")
+    .then((cards) => res.status(200).send({ data: cards }))
+    .catch(next);
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   // eslint-disable-next-line no-console
@@ -13,71 +15,48 @@ const createCard = (req, res) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send({ data: card }))
-    .catch((err) => {
-      if (err.message === 'ValidationError') {
-        return res.status(400).send({ message: `${Object.values(err.errors).map((error) => error.message).join(', ')}`, errors: err.errors });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
   return Card.findByIdAndRemove(cardId)
     .orFail(() => {
-      const error = new Error('No card found with that id');
-      error.statusCode = 404;
-      throw error;
+      throw new NotFoundError("No card found with that id");
     })
     .then((card) => res.status(200).send(card))
-    .catch((err) => {
-      if (err.message === 'No card found with that id') {
-        res.status(404).send({ message: 'No card found with that id' });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  return Card.findByIdAndUpdate(cardId, { $addToSet: { likes: req.user_id } }, { new: true })
+  return Card.findByIdAndUpdate(
+    cardId,
+    { $addToSet: { likes: req.user_id } },
+    { new: true }
+  )
     .orFail(() => {
-      const error = new Error('No card found with that id');
-      error.statusCode = 404;
-      throw error;
+      throw new NotFoundError("No card found with that id");
     })
     .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `${Object.values(err.errors).map((error) => error.message).join(', ')}`, errors: err.errors });
-      } if (err.message === 'No card found with that id') {
-        return res.status(404).send({ message: 'No card found with that id' });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-const deleteLikeCard = (req, res) => {
+const deleteLikeCard = (req, res, next) => {
   const { cardId } = req.params;
 
-  return Card.findByIdAndRemove(cardId, { $pull: { likes: req.user._id } }, { new: true })
+  return Card.findByIdAndRemove(
+    cardId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  )
     .orFail(() => {
-      const error = new Error('No card found with that id');
-      error.statusCode = 404;
-      throw error;
+      throw new NotFoundError("No card found with that id");
     })
-
     .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `${Object.values(err.errors).map((error) => error.message).join(', ')}`, errors: err.errors });
-      } if (err.message === 'No card found with that id') {
-        return res.status(404).send({ message: 'No card found with that id' });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
 module.exports = {
